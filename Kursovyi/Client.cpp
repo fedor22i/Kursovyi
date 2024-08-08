@@ -4,12 +4,37 @@
 
 #pragma comment(lib, "ws2_32.lib")
 
+void executeTask4(SOCKET clientSocket) {
+    int arr[5];
+    std::cout << "Enter 5 integers for the array: ";
+    for (int i = 0; i < 5; ++i) {
+        std::cin >> arr[i];
+    }
+    send(clientSocket, (char*)arr, sizeof(arr), 0);
+    std::cout << "Array sent to server for Task 4." << std::endl;
+}
+
+void executeTask5(SOCKET clientSocket) {
+    int num;
+    std::cout << "Enter a number to compare with server: ";
+    std::cin >> num;
+    send(clientSocket, (char*)&num, sizeof(num), 0);
+    std::cout << "Executing task 5..." << std::endl;
+}
+
+void executeTask6(SOCKET clientSocket) {
+    int num;
+    std::cout << "Enter a number to check for palindrome: ";
+    std::cin >> num;
+    send(clientSocket, (char*)&num, sizeof(num), 0);
+    std::cout << "Executing task 6..." << std::endl;
+}
+
 int main() {
     WSADATA wsaData;
     SOCKET clientSocket;
     sockaddr_in serverAddr;
     char buffer[1024];
-    std::string message1, message2;
 
     // Initialize Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -38,29 +63,48 @@ int main() {
         return 1;
     }
 
-    // Send first message
-    std::cout << "Enter first message: ";
-    std::getline(std::cin, message1);
-    send(clientSocket, message1.c_str(), message1.size(), 0);
+    // Choose task
+    int taskNumber;
+    std::cout << "Task 4: Find max in array" << std::endl;
+    std::cout << "Task 5: Check number against server" << std::endl;
+    std::cout << "Task 6: Check if number is a palindrome" << std::endl;
+    std::cout << "Select task (4, 5, 6): "<< std::endl;
+    std::cin >> taskNumber;
 
-    // Send second message
-    std::cout << "Enter second message: ";
-    std::getline(std::cin, message2);
-    send(clientSocket, message2.c_str(), message2.size(), 0);
+    // Send selected task to server
+    std::string taskMessage = std::to_string(taskNumber);
+    send(clientSocket, taskMessage.c_str(), taskMessage.size(), 0);
 
-    // Receive response from server
+    // Execute the chosen task
+    switch (taskNumber) {
+        case 4:
+            executeTask4(clientSocket);
+            break;
+        case 5:
+            executeTask5(clientSocket);
+            break;
+        case 6:
+            executeTask6(clientSocket);
+            break;
+        default:
+            std::cerr << "Invalid task number." << std::endl;
+            break;
+    }
+
+    // Wait for server response
     int bytesReceived = recv(clientSocket, buffer, 1024, 0);
     if (bytesReceived > 0) {
         buffer[bytesReceived] = '\0';
         std::cout << "Server response: " << buffer << std::endl;
     }
 
-    // Wait for user input before closing
-    std::cout << "Press Enter to exit...";
-    std::cin.get();
-
     // Clean up
     closesocket(clientSocket);
     WSACleanup();
+
+    // Wait for user input before closing
+    std::cout << "Press Enter to exit...";
+    std::cin.get();
+    std::cin.get();
     return 0;
 }
