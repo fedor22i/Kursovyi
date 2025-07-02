@@ -1,6 +1,7 @@
 #include "Common.h"
 #include <iostream>
 
+// Перевіряє, чи є число паліндромом
 bool isPalindrome(int number) {
     int original = number, reversed = 0;
     while (number > 0) {
@@ -10,6 +11,7 @@ bool isPalindrome(int number) {
     return original == reversed;
 }
 
+// Формує рядок з елементів масиву для виводу
 std::string arrayToString(const int* arr, int size) {
     std::string result = "[";
     for (int i = 0; i < size; ++i) {
@@ -20,6 +22,7 @@ std::string arrayToString(const int* arr, int size) {
     return result;
 }
 
+// Ініціалізує Winsock (WSAStartup)
 WinsockInitializer::WinsockInitializer() {
     WSADATA wsaData;
     initialized = (WSAStartup(MAKEWORD(2, 2), &wsaData) == 0);
@@ -28,14 +31,17 @@ WinsockInitializer::WinsockInitializer() {
     }
 }
 
+// Очищає Winsock (WSACleanup)
 WinsockInitializer::~WinsockInitializer() {
     if (initialized) WSACleanup();
 }
 
+// Повертає true, якщо Winsock успішно ініціалізовано
 bool WinsockInitializer::isInitialized() const {
     return initialized;
 }
 
+// Створює TCP сокет, повертає INVALID_SOCKET при помилці
 SOCKET createSocket() {
     SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
     if (s == INVALID_SOCKET) {
@@ -44,6 +50,7 @@ SOCKET createSocket() {
     return s;
 }
 
+// Створює адресу сервера з IP і портом
 sockaddr_in createAddress(const std::string& ip, int port) {
     sockaddr_in addr;
     addr.sin_family = AF_INET;
@@ -52,6 +59,7 @@ sockaddr_in createAddress(const std::string& ip, int port) {
     return addr;
 }
 
+// Створює адресу сервера для bind (INADDR_ANY)
 sockaddr_in createServerAddress(int port) {
     sockaddr_in addr;
     addr.sin_family = AF_INET;
