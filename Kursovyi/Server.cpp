@@ -1,6 +1,7 @@
+// Copyright 2025 <Fedor22i>
+#include <winsock2.h>
 #include <iostream>
 #include <string>
-#include <winsock2.h>
 #include <thread>
 #include <atomic>
 #include "Common.h"
@@ -16,11 +17,13 @@ void handleClient(SOCKET clientSocket, int clientId) {
     std::cout << "Client #" << clientId << " connected." << std::endl;
 
     // (Опційно) відправити клієнту його ID
-    std::string welcomeMsg = "Your client ID is " + std::to_string(clientId) + "\n";
+    std::string welcomeMsg = "Your client ID is "
+                            + std::to_string(clientId) + "\n";
     send(clientSocket, welcomeMsg.c_str(), welcomeMsg.size(), 0);
 
     char buffer[1024];
-    int bytesReceived = recv(clientSocket, buffer, 1024, 0);  // Приймає номер задачі
+    // Приймає номер задачі
+    int bytesReceived = recv(clientSocket, buffer, 1024, 0);
     if (bytesReceived > 0) {
         buffer[bytesReceived] = '\0';
         int taskNumber = std::stoi(buffer);
@@ -32,14 +35,18 @@ void handleClient(SOCKET clientSocket, int clientId) {
 }
 
 int main() {
-    WinsockInitializer winsock;  // Ініціалізує Winsock
+    // Ініціалізує Winsock
+    WinsockInitializer winsock;
     if (!winsock.isInitialized()) return 1;
 
-    SOCKET serverSocket = createSocket();  // Створює серверний сокет
+    // Створює серверний сокет
+    SOCKET serverSocket = createSocket();
     if (serverSocket == INVALID_SOCKET) return 1;
 
-    sockaddr_in serverAddr = createServerAddress(54000);  // Адреса сервера (INADDR_ANY)
-    if (bind(serverSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+    // Адреса сервера (INADDR_ANY)
+    sockaddr_in serverAddr = createServerAddress(54000);
+    if (bind(serverSocket, (reinterpret_cast<sockaddr*>)&serverAddr,
+        sizeof(serverAddr)) == SOCKET_ERROR) {
         std::cerr << "Bind failed." << std::endl;
         closesocket(serverSocket);
         return 1;
@@ -56,13 +63,15 @@ int main() {
     while (true) {
         sockaddr_in clientAddr;
         int clientAddrSize = sizeof(clientAddr);
-        SOCKET clientSocket = accept(serverSocket, (sockaddr*)&clientAddr, &clientAddrSize);
+        SOCKET clientSocket = accept(serverSocket,
+            (reinterpret_cast<sockaddr*>)&clientAddr, &clientAddrSize);
         if (clientSocket == INVALID_SOCKET) {
             std::cerr << "Accept failed." << std::endl;
             continue;
         }
 
-        int clientId = clientIdCounter.fetch_add(1);  // Присвоюємо унікальний ID клієнту
+        // Присвоюємо унікальний ID клієнту
+        int clientId = clientIdCounter.fetch_add(1);
 
         // Запускаємо обробку клієнта в новому потоці з clientId
         std::thread clientThread(handleClient, clientSocket, clientId);

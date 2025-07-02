@@ -1,8 +1,9 @@
-#include <iostream>
-#include <string>
+// Copyright 2025 <Fedor22i>
 #include <winsock2.h>
 #include "Common.h"
 #include "Tasks.h"
+#include <iostream>
+#include <string>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -13,8 +14,11 @@ int main() {
     SOCKET clientSocket = createSocket();  // Створює TCP сокет
     if (clientSocket == INVALID_SOCKET) return 1;
 
-    sockaddr_in serverAddr = createAddress("127.0.0.1", 54000);  // Адреса сервера
-    if (connect(clientSocket, (sockaddr*)&serverAddr, sizeof(serverAddr)) == SOCKET_ERROR) {
+    // Адреса сервера
+    sockaddr_in serverAddr = createAddress("127.0.0.1", 54000);
+    if (connect(clientSocket,
+        (reinterpret_cast<sockaddr*>)&serverAddr,
+        sizeof(serverAddr)) == SOCKET_ERROR) {
         std::cerr << "Connection failed." << std::endl;
         closesocket(clientSocket);
         return 1;
@@ -22,24 +26,31 @@ int main() {
 
     // Приймаємо вітальне повідомлення (ID клієнта)
     char welcomeBuf[128];
-    int welcomeBytes = recv(clientSocket, welcomeBuf, sizeof(welcomeBuf) - 1, 0);
+    int welcomeBytes = recv(clientSocket,
+        welcomeBuf, sizeof(welcomeBuf) - 1, 0);
     if (welcomeBytes > 0) {
         welcomeBuf[welcomeBytes] = '\0';
         std::cout << welcomeBuf;
     }
 
     int taskNumber;
-    std::cout << "Task 4: Find max in array\nTask 5: Check number against server\nTask 6: Check if number is a palindrome" << std::endl;
+    std::cout << "Task 4: Find max in array\n" <<
+    "Task 5: Check number against server\n" <<
+    "Task 6: Check if number is a palindrome" << std::endl;
     std::cout << "Select task (4, 5, 6): ";
     std::cin >> taskNumber;
 
     std::string taskMessage = std::to_string(taskNumber);
-    send(clientSocket, taskMessage.c_str(), taskMessage.size(), 0);  // Відправляє номер задачі на сервер
 
-    dispatchClientTask(taskNumber, clientSocket);  // Виконує відповідну клієнтську логіку
+    // Відправляє номер задачі на сервер
+    send(clientSocket, taskMessage.c_str(), taskMessage.size(), 0);
+
+    // Виконує відповідну клієнтську логіку
+    dispatchClientTask(taskNumber, clientSocket);
 
     char buffer[1024];
-    int bytesReceived = recv(clientSocket, buffer, 1024, 0);  // Очікує відповідь від сервера
+    // Очікує відповідь від сервера
+    int bytesReceived = recv(clientSocket, buffer, 1024, 0);
     if (bytesReceived > 0) {
         buffer[bytesReceived] = '\0';
         std::cout << "Server response: " << buffer << std::endl;

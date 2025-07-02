@@ -1,5 +1,7 @@
+// Copyright 2025 <Fedor22i>
 #include "Common.h"
 #include <iostream>
+#include <string>
 
 // Перевіряє, чи є число паліндромом
 bool isPalindrome(int number) {

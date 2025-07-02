@@ -1,6 +1,7 @@
+// Copyright 2025 <Fedor22i>
 #pragma once
-#include <string>
 #include <winsock2.h>
+#include <string>
 
 // Перевірка, чи є число паліндромом
 bool isPalindrome(int number);
@@ -10,11 +11,11 @@ std::string arrayToString(const int* arr, int size);
 
 // RAII-клас для ініціалізації Winsock (WSAStartup/WSACleanup)
 class WinsockInitializer {
-public:
+ public:
     WinsockInitializer();    // Ініціалізує Winsock при створенні об'єкта
     ~WinsockInitializer();   // Очищає Winsock при знищенні об'єкта
     bool isInitialized() const;  // Перевірка успішної ініціалізації
-private:
+ private:
     bool initialized;
 };
 
